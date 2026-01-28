@@ -1,0 +1,33 @@
+name: Build Windows EXE (pygame)
+
+on:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install build deps
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install pyinstaller pygame
+
+      - name: Build EXE
+        working-directory: tetris_clone
+        run: |
+          python -m PyInstaller --onefile --windowed --name TetrisClone tetris.py
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TetrisClone-windows-exe
+          path: tetris_clone/dist/TetrisClone.exe

@@ -13,6 +13,15 @@ sudo apt-get install -y python3 python3-pygame
 cd tetris_clone
 python3 tetris.py
 
+## Windows EXE (pygame)
+
+This repo includes a GitHub Actions workflow that builds a standalone Windows EXE using **PyInstaller**.
+
+1) Go to the repo → **Actions**
+2) Open **Build Windows EXE (pygame)**
+3) Download the artifact **TetrisClone-windows-exe**
+4) Extract and run `TetrisClone.exe`
+
 ## Quick start (mobile web)
 
 cd tetris_web
