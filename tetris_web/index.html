@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Tetris (Mobile Web)</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="title">Tetris</div>
+    <div class="meta">
+      <div><span class="label">Score</span> <span id="score">0</span></div>
+      <div><span class="label">Lines</span> <span id="lines">0</span></div>
+      <div><span class="label">Level</span> <span id="level">1</span></div>
+    </div>
+  </header>
+
+  <main>
+    <div class="boardWrap">
+      <canvas id="game" width="300" height="600" aria-label="Tetris board"></canvas>
+      <div class="side">
+        <div class="panel">
+          <div class="panelTitle">Next</div>
+          <canvas id="next" width="120" height="120"></canvas>
+        </div>
+        <div class="panel">
+          <div class="panelTitle">Hold</div>
+          <canvas id="hold" width="120" height="120"></canvas>
+        </div>
+        <div class="panel hint">
+          <div class="panelTitle">Controls</div>
+          <div class="hintLine">Tap left/right: move</div>
+          <div class="hintLine">Tap center: rotate</div>
+          <div class="hintLine">Swipe down: soft drop</div>
+          <div class="hintLine">Swipe up: hard drop</div>
+          <div class="hintLine">Hold button: hold piece</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="controls">
+      <button id="btnLeft" class="btn">◀</button>
+      <button id="btnRotate" class="btn">⟳</button>
+      <button id="btnRight" class="btn">▶</button>
+      <button id="btnDown" class="btn">▼</button>
+      <button id="btnDrop" class="btn">⤓</button>
+      <button id="btnHold" class="btn">Hold</button>
+      <button id="btnPause" class="btn">Pause</button>
+      <button id="btnRestart" class="btn">Restart</button>
+    </div>
+
+    <details class="kbd">
+      <summary>Keyboard controls (desktop)</summary>
+      <div class="kbdGrid">
+        <div>← →: move</div>
+        <div>↓: soft drop</div>
+        <div>Space: hard drop</div>
+        <div>↑ / X: rotate</div>
+        <div>Z: rotate CCW</div>
+        <div>C: hold</div>
+        <div>P: pause</div>
+        <div>R: restart</div>
+      </div>
+    </details>
+  </main>
+
+  <div id="overlay" class="overlay hidden">
+    <div class="overlayCard">
+      <div id="overlayTitle" class="overlayTitle">Paused</div>
+      <div id="overlayMsg" class="overlayMsg"></div>
+      <div class="overlayBtns">
+        <button id="overlayResume" class="btn">Resume</button>
+        <button id="overlayRestart" class="btn">Restart</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="tetris.js"></script>
+</body>
+</html>
