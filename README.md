@@ -1,5 +1,12 @@
 # tetris-clone
 
+## Web version
+
+The mobile web build lives in `./tetris_web`.
+
+GitHub Pages (after the workflow runs):
+- https://ericargyle.github.io/tetris-clone/
+
 Two small Tetris clones:
 
 - Ubuntu (pygame): tetris_clone/ — runs locally with Python + pygame.
