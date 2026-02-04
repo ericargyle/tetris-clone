@@ -84,6 +84,104 @@
   const btnPause = document.getElementById('btnPause');
   const btnRestart = document.getElementById('btnRestart');
 
+  const btnSfx = document.getElementById('btnSfx');
+  const sfxState = document.getElementById('sfxState');
+
+  // --- Sound effects (WebAudio, no asset files required) ---
+  const SFX_KEY = 'tetris_web:sfx';
+  let sfxEnabled = (localStorage.getItem(SFX_KEY) ?? 'on') !== 'off';
+
+  let audioCtx = null;
+  const ensureAudio = async () => {
+    if(!sfxEnabled) return null;
+    if(!audioCtx){
+      const Ctx = window.AudioContext || window.webkitAudioContext;
+      audioCtx = new Ctx();
+    }
+    if(audioCtx.state === 'suspended') await audioCtx.resume();
+    return audioCtx;
+  };
+
+  function uiSfx(){
+    btnSfx?.setAttribute('aria-pressed', sfxEnabled ? 'true' : 'false');
+    if(sfxState) sfxState.textContent = sfxEnabled ? 'On' : 'Off';
+  }
+  uiSfx();
+
+  btnSfx?.addEventListener('click', async () => {
+    sfxEnabled = !sfxEnabled;
+    localStorage.setItem(SFX_KEY, sfxEnabled ? 'on' : 'off');
+    uiSfx();
+    if(sfxEnabled) await ensureAudio();
+  });
+
+  function playPlace(){
+    if(!sfxEnabled) return;
+    ensureAudio().then((ac)=>{
+      if(!ac) return;
+      const t = ac.currentTime;
+      const osc = ac.createOscillator();
+      const g = ac.createGain();
+      osc.type = 'triangle';
+      osc.frequency.setValueAtTime(220, t);
+      osc.frequency.exponentialRampToValueAtTime(120, t + 0.06);
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.18, t + 0.01);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + 0.08);
+      osc.connect(g).connect(ac.destination);
+      osc.start(t);
+      osc.stop(t + 0.09);
+    });
+  }
+
+  function playKaboom(){
+    if(!sfxEnabled) return;
+    ensureAudio().then((ac)=>{
+      if(!ac) return;
+      const t = ac.currentTime;
+
+      // Noise burst
+      const duration = 0.35;
+      const bufferSize = Math.floor(ac.sampleRate * duration);
+      const buffer = ac.createBuffer(1, bufferSize, ac.sampleRate);
+      const data = buffer.getChannelData(0);
+      for(let i=0;i<bufferSize;i++){
+        const decay = 1 - i/bufferSize;
+        data[i] = (Math.random()*2 - 1) * Math.pow(decay, 2);
+      }
+      const noise = ac.createBufferSource();
+      noise.buffer = buffer;
+
+      const filter = ac.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.setValueAtTime(900, t);
+      filter.frequency.exponentialRampToValueAtTime(120, t + duration);
+
+      const g = ac.createGain();
+      g.gain.setValueAtTime(0.0001, t);
+      g.gain.exponentialRampToValueAtTime(0.5, t + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + duration);
+
+      // Sub thump
+      const osc = ac.createOscillator();
+      const og = ac.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(90, t);
+      osc.frequency.exponentialRampToValueAtTime(40, t + 0.18);
+      og.gain.setValueAtTime(0.0001, t);
+      og.gain.exponentialRampToValueAtTime(0.6, t + 0.01);
+      og.gain.exponentialRampToValueAtTime(0.0001, t + 0.22);
+
+      noise.connect(filter).connect(g).connect(ac.destination);
+      osc.connect(og).connect(ac.destination);
+
+      noise.start(t);
+      noise.stop(t + duration);
+      osc.start(t);
+      osc.stop(t + 0.24);
+    });
+  }
+
   function rotateCW(m){
     const out = Array.from({length:4}, () => Array(4).fill(0));
     for(let r=0;r<4;r++) for(let c=0;c<4;c++) out[c][3-r] = m[r][c];
@@ -210,12 +308,15 @@
 
   function lockNow(){
     lock(state.board, state.cur);
+    playPlace();
+
     const cleared = clearLines(state.board);
     if(cleared){
       const pts = {1:100,2:300,3:500,4:800}[cleared] || 0;
       state.score += pts * state.level;
       state.lines += cleared;
       updateLevel();
+      if(cleared === 4) playKaboom();
     }
     spawnNext();
     updateHUD();
